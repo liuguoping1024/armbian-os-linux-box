@@ -1,0 +1,205 @@
+on: # <TEMPLATE-IGNORE>
+  workflow_dispatch:  # <TEMPLATE-IGNORE>
+jobs: # <TEMPLATE-IGNORE>
+  "TEMPLATE-JOB-NAME": # <TEMPLATE-JOB-NAME>
+    needs: [ "matrix_prep", "all-artifacts-ready" ]
+    timeout-minutes: 240
+    if: ${{ !failure() && !cancelled() && ( github.repository_owner == '[[org]]' ) && ( needs.matrix_prep.outputs.images-chunk-not-empty-[[chunk]] == 'yes' ) }} # <-- HERE: Chunk number.
+    strategy:
+      fail-fast: false # let other jobs try to complete if one fails
+      matrix: ${{ fromJSON(needs.matrix_prep.outputs.images-chunk-json-[[chunk]]) }} # <-- HERE: Chunk number.
+    name: ${{ matrix.desc || 'Empty I[[chunk]]' }} # <-- HERE: Chunk number.
+    runs-on: ${{ matrix.runs_on }}
+    steps:
+
+      - name: Install dependencies
+        run: |
+          if [ ! -e /usr/bin/mktorrent ]; then
+            sudo apt-get update
+            sudo apt-get install -y mktorrent
+          fi
+
+      # cleaning self hosted runners
+      - name: "Runner clean ${{ needs.matrix_prep.outputs.version }}"
+        uses: armbian/actions/runner-clean@main
+
+      # cleanup the place where we will clone the userpatches repo, to avoid git going insane and cleaning everything later
+      - name: Cleanup userpatches repo
+        if: ${{ ( env.USERPATCHES_REPOSITORY != '' ) && ( env.USERPATCHES_REF != '' ) }}
+        run: rm -rf userpatches.repo
+
+      - name: Checkout build repo
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.BUILD_REPOSITORY }}
+          ref: ${{ needs.matrix_prep.outputs.build-sha1 }}
+          fetch-depth: ${{ matrix.fdepth }}
+          clean: false # true is default. it *will* delete the hosts /dev if mounted inside.
+
+      # clone the userpatches repo (`armbian/os`)
+      - name: "Checkout userpatches repo: ${{env.USERPATCHES_REPOSITORY}}#${{env.USERPATCHES_REF}}"
+        uses: actions/checkout@v4
+        if: ${{ ( env.USERPATCHES_REPOSITORY != '' ) && ( env.USERPATCHES_REF != '' ) }}
+        with:
+          repository: ${{ env.USERPATCHES_REPOSITORY }}
+          ref: ${{ env.USERPATCHES_REF }}
+          fetch-depth: ${{ matrix.fdepth }}
+          clean: false # true is default.
+          path: userpatches.repo
+
+      - name: "Put userpatches in place, and remove userpatches repo"
+        if: ${{ ( env.USERPATCHES_REPOSITORY != '' ) && ( env.USERPATCHES_REF != '' ) }}
+        run: |
+          mkdir -pv userpatches
+          rsync -av userpatches.repo/${{env.USERPATCHES_DIR}}/. userpatches/
+          rm -rf userpatches.repo
+
+      - name: "Cleanup leftover output"
+        run: |
+          rm -f userpatches/VERSION
+
+      - name: ${{matrix.desc}}
+        id: build-one-image
+        timeout-minutes: 60
+        run: |
+          # calculate loop from runner name
+          if [ -z "${ImageOS}" ]; then
+          USE_FIXED_LOOP_DEVICE=$(echo ${RUNNER_NAME} | rev | cut -d"-" -f1  | rev | sed 's/^0*//' | sed -e 's/^/\/dev\/loop/')
+          fi
+          bash ./compile.sh ${{ matrix.invocation }} REVISION="${{ needs.matrix_prep.outputs.version }}" USE_FIXED_LOOP_DEVICE="$USE_FIXED_LOOP_DEVICE" SHARE_LOG=yes MAKE_FOLDERS="archive" IMAGE_VERSION=${{ needs.matrix_prep.outputs.version }} ${{env.EXTRA_PARAMS_IMAGE}} ${{env.EXTRA_PARAMS_ALL_BUILDS}}
+
+      - name: "Logs: ${{ steps.build-one-image.outputs.logs_url }}"
+        if: always()
+        run: |
+          echo "Logs: ${{ steps.build-one-image.outputs.logs_url }}"
+
+      - name: Install SSH key
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.KEY_UPLOAD }}
+          known_hosts: ${{ secrets.KNOWN_HOSTS_ARMBIAN_UPLOAD }}
+          if_key_exists: replace
+
+      - name: Check API rate limits
+        run: |
+
+          # install dependencies
+          if ! command -v "gh" > /dev/null 2>&1; then
+             sudo apt-get -y -qq install gh
+          fi
+
+          while true
+            do
+            API_CALLS_TOTAL=$(gh api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" /rate_limit | jq -r '.rate.limit')
+            API_CALLS_LEFT=$(gh api -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2022-11-28" /rate_limit | jq -r '.rate.remaining')
+            PERCENT=$(( API_CALLS_LEFT * 100 / API_CALLS_TOTAL ))
+            if (( $PERCENT > 20 )); then
+                echo "API rate in good shape $PERCENT % free"
+                exit 0
+            fi
+            echo "API rate lower then 20%, sleping 10m"
+            sleep 10m
+          done
+
+          # show current api rate
+          curl -s -H "Accept: application/vnd.github.v3+json" -H "Authorization: token ${{ secrets.ACCESS_TOKEN }}" https://api.github.com/rate_limit
+
+      - name: Import GPG key
+        env:
+          GPG_KEY1: ${{ secrets.GPG_KEY1 }}
+        if: env.GPG_KEY1 != null
+        uses: crazy-max/ghaction-import-gpg@v6
+        with:
+          gpg_private_key: ${{ secrets.GPG_KEY1 }}
+          passphrase: ${{ secrets.GPG_PASSPHRASE1 }}
+
+      - name: Sign
+        env:
+          GPG_PASSPHRASE1: ${{ secrets.GPG_PASSPHRASE1 }}
+        if: env.GPG_PASSPHRASE1 != null
+        run: |
+
+          echo ${{ secrets.GPG_PASSPHRASE1 }} | gpg --passphrase-fd 0 --armor --detach-sign --pinentry-mode loopback --batch --yes output/images/*/archive/*.xz
+
+      # Download the artifacts (output/info) produced by the prepare-matrix job.
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-info-json
+          path: output/info
+
+      - name: Generate torrent
+        timeout-minutes: 3
+        run: |
+
+          TRACKERS=$(cat output/info/best-torrent-servers.txt | sed '/^\s*$/d' | sort -R | while read line; do printf " --announce=""${line}"; done)
+          BOARD=$(ls -1 output/images/ | head -1)
+          FILE=$(ls -1 output/images/*/archive/*.xz | head -1 | rev | cut -d"/" -f1  | rev)
+          WEBSEEDS="https://github.com/armbian/[[release_repo]]/releases/download/${{ needs.matrix_prep.outputs.version }}/${FILE}"
+          # nighly images are GH only
+          rm -f servers.txt
+          if [ "${{ github.event.inputs.nightlybuild || [[nightlybuildDefaults]] }}" == "no" ]; then
+
+             WEBSEEDS=$(for server in $(cat output/info/servers-download.csv)
+             do
+             echo "http://$server/$SERVER_PATH" | sed "s|$|${BOARD}\/archive\/${FILE},|"
+             done | sed 's/ \+/\n/g')
+
+          fi
+          cd output/images/*/archive/
+          mktorrent --comment="Armbian torrent for ${FILE}" --verbose ${TRACKERS} --web-seed="${WEBSEEDS}" ${FILE}
+
+      #- name: Choose random user for upload
+      #  run: |
+
+          #arr[0]="${{ secrets.ACCESS_TOKEN }}"
+          #arr[1]="${{ secrets.ACCESS_TOKEN_ARMBIANWORKER }}"
+          #rand=$[ $RANDOM % 2 ]
+          #echo "upload_user=${arr[$rand]}" >> $GITHUB_ENV
+
+
+      - name: "Upload artefacts"
+        timeout-minutes: 60
+        if: ${{ ( github.event.inputs.nightlybuild || [[nightlybuildDefaults]] ) == 'yes' || env.RELEASE_REPOSITORY == 'community' || env.RELEASE_REPOSITORY == 'distribution' }}
+        uses: ncipollo/release-action@v1
+        with:
+          repo: "${{ env.RELEASE_REPOSITORY }}"
+          artifacts: "output/images/*/*/Armbian_*.*"
+          tag: "${{ needs.matrix_prep.outputs.version }}"
+          omitBody: true
+          replacesArtifacts: true
+          omitName: true
+          makeLatest: false
+          omitPrereleaseDuringUpdate: true
+          allowUpdates: true
+          artifactErrorsFailBuild: true
+          token: "${{ env.GH_TOKEN }}"
+          #token: ${{ secrets.ACCESS_TOKEN }}
+          #token: ${{ env.upload_user }}
+
+      - name: Deploy to servers
+        timeout-minutes: 240
+        if: ${{ ( github.event.inputs.nightlybuild || [[nightlybuildDefaults]] ) == 'no' && env.RELEASE_REPOSITORY == 'os' }}
+        #if: ${{ github.event.inputs.uploadtoserver == 'armbian' || github.event.inputs.uploadtoserver == 'both' }}
+        run: |
+
+          # generate control file which checks mirrors
+          sudo date +%s > output/images/control
+          cat output/info/servers-upload.csv | \
+          while read i; do
+             SERVER_URL=$(echo $i | cut -d "," -f1)
+             SERVER_PORT=$(echo $i | cut -d "," -f3)
+             SERVER_PATH=$(echo $i | cut -d "," -f2)
+             SERVER_USERNAME=$(echo $i | cut -d "," -f4)
+             # clean
+             ssh-keygen -f "${HOME}/.ssh/known_hosts" -R "${SERVER_URL}"
+             # upload
+             rsync --progress -e \
+             "ssh -p ${SERVER_PORT} -o StrictHostKeyChecking=accept-new" \
+             -rvP output/images/ "${SERVER_USERNAME}@${SERVER_URL}:${SERVER_PATH}/incoming/${{ github.actor }}/"
+          done
+
+      # cleaning self hosted runners
+      - name: "Runner clean ${{ needs.matrix_prep.outputs.version }}"
+        if: always()
+        uses: armbian/actions/runner-clean@main

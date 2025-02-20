@@ -1,0 +1,440 @@
+#
+# Armbian release template for automated generation. DO NOT EDIT .yaml files. Edit .template
+#
+
+common-gha-configs:
+  armbian-gha: &armbian-gha
+    runners:
+      default: "ubuntu-latest" # or a ["tag", "list"]
+      by-name:
+        kernel: [ "self-hosted", "Linux", "alfa" ]
+        uboot: [ "self-hosted", "Linux", "fast", "X64" ]
+        armbian-bsp-cli: [ "fast" ]
+      by-name-and-arch:
+        rootfs-armhf: [ "self-hosted", "Linux", "ARM64" , "fast" ]
+        rootfs-arm64: [ "self-hosted", "Linux", "ARM64" , "fast" ]
+        rootfs-amd64: [ "self-hosted", "Linux", "X64", "fast" ]
+        rootfs-riscv64: [ "self-hosted", "Linux", "X64", "fast" ]
+        image-arm64: [ "images", "fast" ]
+        image-amd64: [ "self-hosted", "Linux", 'fast', "X64" ]
+        image-riscv64: [ "self-hosted", "Linux", 'fast', "X64" ]
+
+lists:
+
+  # automated lists start
+  community-maintained-riscv64: &community-maintained-riscv64
+    # auto generated section
+    - { BOARD: bananapif3, BRANCH: legacy }
+    - { BOARD: beaglev, BRANCH: edge }
+    - { BOARD: star64, BRANCH: edge }
+    - { BOARD: uefi-riscv64, BRANCH: current }
+    - { BOARD: unleashed, BRANCH: edge }
+    - { BOARD: unmatched, BRANCH: edge }
+    - { BOARD: visionfive, BRANCH: edge }
+    - { BOARD: visionfive2, BRANCH: edge }
+    # end of auto generated section
+
+  community-maintained-headless: &community-maintained-headless
+    # auto generated section
+    - { BOARD: clearfogbase, BRANCH: current }
+    - { BOARD: clearfogpro, BRANCH: current }
+    - { BOARD: cubieboard, BRANCH: current }
+    - { BOARD: helios4, BRANCH: current }
+    - { BOARD: lime-a33, BRANCH: current }
+    - { BOARD: macchiatobin-doubleshot, BRANCH: current }
+    - { BOARD: melea1000, BRANCH: current }
+    - { BOARD: mk808c, BRANCH: current }
+    - { BOARD: nanopi-r1, BRANCH: current }
+    - { BOARD: nanopi-r1s-h5, BRANCH: current }
+    - { BOARD: nanopi-r2c, BRANCH: current }
+    - { BOARD: nanopi-r2s, BRANCH: current }
+    - { BOARD: nanopi-r4se, BRANCH: current }
+    - { BOARD: nanopiair, BRANCH: current }
+    - { BOARD: nanopiduo, BRANCH: current }
+    - { BOARD: nanopiduo2, BRANCH: current }
+    - { BOARD: nanopineo, BRANCH: current }
+    - { BOARD: nanopineo2, BRANCH: current }
+    - { BOARD: nanopineo2black, BRANCH: current }
+    - { BOARD: nanopineo3, BRANCH: current }
+    - { BOARD: nanopineocore2, BRANCH: current }
+    - { BOARD: nanopineoplus2, BRANCH: current }
+    - { BOARD: olinux-som-a13, BRANCH: current }
+    - { BOARD: orangepi-r1, BRANCH: current }
+    - { BOARD: orangepi-r1plus-lts, BRANCH: current }
+    - { BOARD: orangepi-r1plus, BRANCH: current }
+    - { BOARD: orangepizeroplus2-h5, BRANCH: current }
+    - { BOARD: pinecube, BRANCH: current }
+    - { BOARD: sakurapi-rk3308b, BRANCH: current }
+    - { BOARD: zeropi, BRANCH: legacy }
+    # end of auto generated section
+
+  community-maintained-fast-hdmi: &community-maintained-fast-hdmi
+    # auto generated section
+    - { BOARD: aml-s9xx-box, BRANCH: current }
+    - { BOARD: aml-t95z-plus, BRANCH: edge }
+    - { BOARD: armsom-aim7-io, BRANCH: vendor }
+    - { BOARD: armsom-cm5-io, BRANCH: vendor }
+    - { BOARD: armsom-cm5-rpi-cm4-io, BRANCH: vendor }
+    - { BOARD: armsom-sige1, BRANCH: vendor }
+    - { BOARD: armsom-sige3, BRANCH: vendor }
+    - { BOARD: armsom-sige5, BRANCH: vendor }
+    - { BOARD: armsom-sige7, BRANCH: current, ENABLE_EXTENSIONS: "mesa-vpu" }
+    - { BOARD: armsom-w3, BRANCH: vendor, ENABLE_EXTENSIONS: "v4l2loopback-dkms,mesa-vpu" }
+    - { BOARD: avaota-a1, BRANCH: legacy }
+    - { BOARD: bananapim64, BRANCH: current }
+    - { BOARD: bananapir2pro, BRANCH: current }
+    - { BOARD: cherryba-m1, BRANCH: current }
+    - { BOARD: clockworkpi-a06, BRANCH: current }
+    - { BOARD: cm3588-nas, BRANCH: current, ENABLE_EXTENSIONS: "mesa-vpu" }
+    - { BOARD: coolpi-cm5, BRANCH: edge }
+    - { BOARD: core3566, BRANCH: vendor }
+    - { BOARD: cyber-aib-rk3588, BRANCH: vendor }
+    - { BOARD: fine3399, BRANCH: current }
+    - { BOARD: firefly-itx-3588j, BRANCH: vendor, ENABLE_EXTENSIONS: "v4l2loopback-dkms,mesa-vpu" }
+    - { BOARD: firefly-rk3399, BRANCH: current }
+    - { BOARD: fxblox-rk1, BRANCH: vendor, ENABLE_EXTENSIONS: "v4l2loopback-dkms,mesa-vpu" }
+    - { BOARD: h96-tvbox-3566, BRANCH: current }
+    - { BOARD: hikey960, BRANCH: current }
+    - { BOARD: hinlink-h28k, BRANCH: vendor }
+    - { BOARD: hinlink-h66k, BRANCH: vendor }
+    - { BOARD: hinlink-h68k, BRANCH: vendor }
+    - { BOARD: hinlink-h88k, BRANCH: vendor, ENABLE_EXTENSIONS: "v4l2loopback-dkms,mesa-vpu" }
+    - { BOARD: hinlink-hnas, BRANCH: vendor }
+    - { BOARD: hinlink-ht2, BRANCH: vendor }
+    - { BOARD: indiedroid-nova, BRANCH: current, ENABLE_EXTENSIONS: "mesa-vpu" }
+    - { BOARD: jetson-nano, BRANCH: current }
+    - { BOARD: jp-tvbox-3566, BRANCH: current }
+    - { BOARD: khadas-edge, BRANCH: current }
+    - { BOARD: lckfb-taishanpi, BRANCH: vendor }
+    - { BOARD: leez-p710, BRANCH: current }
+    - { BOARD: lime-a64, BRANCH: current }
+    - { BOARD: longanpi-4b, BRANCH: legacy }
+    - { BOARD: lubancat2, BRANCH: edge }
+    - { BOARD: luckfox-core3566, BRANCH: vendor }
+    - { BOARD: mangopi-m28k, BRANCH: vendor }
+    - { BOARD: mekotronics-r58-minipc, BRANCH: vendor, ENABLE_EXTENSIONS: "v4l2loopback-dkms,mesa-vpu" }
+    - { BOARD: mekotronics-r58x-4g, BRANCH: vendor, ENABLE_EXTENSIONS: "v4l2loopback-dkms,mesa-vpu" }
+    - { BOARD: mekotronics-r58x-pro, BRANCH: vendor, ENABLE_EXTENSIONS: "v4l2loopback-dkms,mesa-vpu" }
+    - { BOARD: mekotronics-r58x, BRANCH: vendor, ENABLE_EXTENSIONS: "v4l2loopback-dkms,mesa-vpu" }
+    - { BOARD: mixtile-blade3, BRANCH: vendor, ENABLE_EXTENSIONS: "v4l2loopback-dkms,mesa-vpu" }
+    - { BOARD: mixtile-edge2, BRANCH: edge }
+    - { BOARD: nanopct4, BRANCH: current, ENABLE_EXTENSIONS: "v4l2loopback-dkms,mesa-vpu" }
+    - { BOARD: nanopi-r5c, BRANCH: current, ENABLE_EXTENSIONS: "mesa-vpu" }
+    - { BOARD: nanopi-r5s, BRANCH: current, ENABLE_EXTENSIONS: "mesa-vpu" }
+    - { BOARD: nanopi-r6c, BRANCH: current, ENABLE_EXTENSIONS: "mesa-vpu" }
+    - { BOARD: nanopia64, BRANCH: current }
+    - { BOARD: nanopik1plus, BRANCH: current }
+    - { BOARD: nanopik2-s905, BRANCH: current }
+    - { BOARD: nanopim4, BRANCH: current, ENABLE_EXTENSIONS: "v4l2loopback-dkms,mesa-vpu" }
+    - { BOARD: nanopineo4, BRANCH: current, ENABLE_EXTENSIONS: "v4l2loopback-dkms,mesa-vpu" }
+    - { BOARD: odroidn2l, BRANCH: current, ENABLE_EXTENSIONS: "mesa-vpu" }
+    - { BOARD: orangepi-rk3399, BRANCH: current }
+    - { BOARD: orangepi3-lts, BRANCH: current, ENABLE_EXTENSIONS: "v4l2loopback-dkms,mesa-vpu" }
+    - { BOARD: orangepi3, BRANCH: current, ENABLE_EXTENSIONS: "v4l2loopback-dkms,mesa-vpu" }
+    - { BOARD: orangepi3b, BRANCH: vendor, ENABLE_EXTENSIONS: "v4l2loopback-dkms,mesa-vpu" }
+    - { BOARD: orangepi4, BRANCH: current, ENABLE_EXTENSIONS: "v4l2loopback-dkms,mesa-vpu" }
+    - { BOARD: orangepi5-max, BRANCH: vendor }
+    - { BOARD: orangepi5pro, BRANCH: vendor }
+    - { BOARD: orangepilite2, BRANCH: current }
+    - { BOARD: orangepioneplus, BRANCH: current }
+    - { BOARD: orangepipc2, BRANCH: current, ENABLE_EXTENSIONS: "v4l2loopback-dkms,mesa-vpu" }
+    - { BOARD: orangepiprime, BRANCH: current }
+    - { BOARD: orangepiwin, BRANCH: current }
+    - { BOARD: orangepizero2w, BRANCH: current }
+    - { BOARD: orangepizero3, BRANCH: current }
+    - { BOARD: panther-x2, BRANCH: current }
+    - { BOARD: pine64so, BRANCH: current }
+    - { BOARD: pinebook-a64, BRANCH: current }
+    - { BOARD: pinebook-pro, BRANCH: current, ENABLE_EXTENSIONS: "mesa-vpu" }
+    - { BOARD: pineh64-b, BRANCH: current, ENABLE_EXTENSIONS: "v4l2loopback-dkms,mesa-vpu" }
+    - { BOARD: pineh64, BRANCH: current, ENABLE_EXTENSIONS: "v4l2loopback-dkms,mesa-vpu" }
+    - { BOARD: quartz64a, BRANCH: current }
+    - { BOARD: quartz64b, BRANCH: current }
+    - { BOARD: radxa-e20c, BRANCH: vendor }
+    - { BOARD: radxa-e25, BRANCH: current }
+    - { BOARD: radxa-zero2, BRANCH: current }
+    - { BOARD: radxa-zero3, BRANCH: vendor }
+    - { BOARD: recore, BRANCH: current }
+    - { BOARD: retro-lite-cm5, BRANCH: vendor }
+    - { BOARD: rk3318-box, BRANCH: current }
+    - { BOARD: rk3328-heltec, BRANCH: current }
+    - { BOARD: roc-rk3399-pc, BRANCH: current }
+    - { BOARD: rock-3c, BRANCH: current }
+    - { BOARD: rock-4se, BRANCH: current }
+    - { BOARD: rock-5-cm-rpi-cm4-io, BRANCH: vendor }
+    - { BOARD: rock-5-cmio, BRANCH: vendor, ENABLE_EXTENSIONS: "v4l2loopback-dkms,mesa-vpu" }
+    - { BOARD: rock64, BRANCH: current }
+    - { BOARD: rockpi-4a, BRANCH: current, ENABLE_EXTENSIONS: "v4l2loopback-dkms,mesa-vpu" }
+    - { BOARD: rockpi-4b, BRANCH: current, ENABLE_EXTENSIONS: "v4l2loopback-dkms,mesa-vpu" }
+    - { BOARD: rockpi-4bplus, BRANCH: current, ENABLE_EXTENSIONS: "v4l2loopback-dkms,mesa-vpu" }
+    - { BOARD: rockpi-4c, BRANCH: current, ENABLE_EXTENSIONS: "v4l2loopback-dkms,mesa-vpu" }
+    - { BOARD: rockpi-4cplus, BRANCH: current, ENABLE_EXTENSIONS: "v4l2loopback-dkms,mesa-vpu" }
+    - { BOARD: rockpi-n10, BRANCH: current, ENABLE_EXTENSIONS: "v4l2loopback-dkms,mesa-vpu" }
+    - { BOARD: rockpro64, BRANCH: current, ENABLE_EXTENSIONS: "mesa-vpu" }
+    - { BOARD: rpi5b, BRANCH: current }
+    - { BOARD: station-m1, BRANCH: current }
+    - { BOARD: station-m2, BRANCH: current }
+    - { BOARD: station-m3, BRANCH: vendor, ENABLE_EXTENSIONS: "v4l2loopback-dkms,mesa-vpu" }
+    - { BOARD: station-p1, BRANCH: current }
+    - { BOARD: station-p2, BRANCH: current }
+    - { BOARD: tanix-tx6, BRANCH: current }
+    - { BOARD: tinker-edge-r, BRANCH: current, ENABLE_EXTENSIONS: "v4l2loopback-dkms,mesa-vpu" }
+    - { BOARD: tinkerboard-2, BRANCH: current, ENABLE_EXTENSIONS: "v4l2loopback-dkms,mesa-vpu" }
+    - { BOARD: turing-rk1, BRANCH: vendor }
+    - { BOARD: wdk2023, BRANCH: wdk2023}
+    - { BOARD: x96-mate, BRANCH: current }
+    - { BOARD: x96q, BRANCH: current }
+    - { BOARD: xiaobao-nas, BRANCH: current }
+    - { BOARD: youyeetoo-r1-v3, BRANCH: current, ENABLE_EXTENSIONS: "mesa-vpu" }
+    - { BOARD: z28pro, BRANCH: current }
+    # end of auto generated section
+
+  community-maintained-slow-hdmi: &community-maintained-slow-hdmi
+    # auto generated section
+    - { BOARD: bananapim1plus, BRANCH: current }
+    - { BOARD: bananapim2plus, BRANCH: current }
+    - { BOARD: bananapim2ultra, BRANCH: current }
+    - { BOARD: bananapim2zero, BRANCH: current }
+    - { BOARD: bananapim3, BRANCH: current }
+    - { BOARD: bananapipro, BRANCH: current }
+    - { BOARD: bananapir2, BRANCH: current }
+    - { BOARD: beelinkx2, BRANCH: current }
+    - { BOARD: cubieboard2, BRANCH: current }
+    - { BOARD: cubieboard4, BRANCH: current }
+    - { BOARD: cubietruck, BRANCH: current }
+    - { BOARD: cubox-i, BRANCH: current }
+    - { BOARD: lime, BRANCH: current }
+    - { BOARD: lime2, BRANCH: current }
+    - { BOARD: odroidc1, BRANCH: current }
+    - { BOARD: olimex-a20-olinuxino-micro, BRANCH: current }
+    - { BOARD: orangepi2, BRANCH: current }
+    - { BOARD: orangepilite, BRANCH: current }
+    - { BOARD: orangepipc, BRANCH: current }
+    - { BOARD: orangepipcplus, BRANCH: current }
+    - { BOARD: orangepiplus, BRANCH: current }
+    - { BOARD: orangepiplus2e, BRANCH: legacy }
+    - { BOARD: orangepizero, BRANCH: current }
+    - { BOARD: orangepizeroplus2-h3, BRANCH: current }
+    - { BOARD: pcduino3, BRANCH: current }
+    - { BOARD: rk322x-box, BRANCH: current }
+    - { BOARD: sunvell-r69, BRANCH: current }
+    - { BOARD: udoo, BRANCH: current }
+    - { BOARD: xt-q8l-v10, BRANCH: current }
+    # end of auto generated section
+
+  # automated lists stop
+
+targets:
+
+  # debian stable cli minimal
+  minimal-cli-stable-debian:
+    enabled: yes
+    configs: [ armbian-community ]
+    pipeline:
+      gha: *armbian-gha
+      build-image: "yes"
+    vars:
+      RELEASE: bookworm
+      BUILD_MINIMAL: "yes"
+      BUILD_DESKTOP: "no"
+    items:
+      - *community-maintained-headless
+      - *community-maintained-fast-hdmi
+      - *community-maintained-slow-hdmi
+
+  # debian stable cli
+  full-cli-stable-debian:
+    enabled: yes
+    configs: [ armbian-community ]
+    pipeline:
+      gha: *armbian-gha
+      build-image: "yes"
+    vars:
+      RELEASE: bookworm
+      BUILD_MINIMAL: "no"
+      BUILD_DESKTOP: "no"
+    items:
+      - { BOARD: aml-s9xx-box, BRANCH: current }
+
+  # debian stable xfce
+  xfce-desktop-stable-debian:
+    enabled: yes
+    configs: [ armbian-community ]
+    pipeline:
+      gha: *armbian-gha
+      build-image: "yes"
+    vars:
+      RELEASE: bookworm
+      BUILD_MINIMAL: "no"
+      DESKTOP_ENVIRONMENT: "xfce"
+      BUILD_DESKTOP: "yes"
+      DESKTOP_ENVIRONMENT_CONFIG_NAME: "config_base"
+      DESKTOP_APPGROUPS_SELECTED: "desktop_tools,internet,languages,multimedia,remote_desktop"
+    items:
+      - { BOARD: aml-s9xx-box, BRANCH: current }
+
+  # debian stable gnome
+  gnome-desktop-stable-debian:
+    enabled: yes
+    configs: [ armbian-community ]
+    pipeline:
+      gha: *armbian-gha
+      build-image: "yes"
+    vars:
+      RELEASE: bookworm
+      BUILD_MINIMAL: "no"
+      DESKTOP_ENVIRONMENT: "gnome"
+      BUILD_DESKTOP: "yes"
+      DESKTOP_ENVIRONMENT_CONFIG_NAME: "config_base"
+      DESKTOP_APPGROUPS_SELECTED: "browsers,chat,desktop_tools,editors,email,internet,languages,multimedia,office,programming,remote_desktop"
+    items:
+      - { BOARD: aml-s9xx-box, BRANCH: current }
+
+  # ubuntu stable cli
+  full-cli-stable-ubuntu:
+    enabled: yes
+    configs: [ armbian-community ]
+    pipeline:
+      gha: *armbian-gha
+      build-image: "yes"
+    vars:
+      RELEASE: noble
+      BUILD_MINIMAL: "no"
+      BUILD_DESKTOP: "no"
+    items:
+      - *community-maintained-headless
+      - { BOARD: aml-s9xx-box, BRANCH: current }
+
+  # ubuntu stable cli minimal
+  minimal-cli-stable-ubuntu:
+    enabled: yes
+    configs: [ armbian-community ]
+    pipeline:
+      gha: *armbian-gha
+      build-image: "yes"
+    vars:
+      RELEASE: noble
+      BUILD_MINIMAL: "yes"
+      BUILD_DESKTOP: "no"
+    items:
+      - *community-maintained-riscv64
+      - { BOARD: aml-s9xx-box, BRANCH: current }
+
+  # ubuntu unstable cli
+  full-cli-unstable-ubuntu:
+    enabled: yes
+    configs: [ armbian-community ]
+    pipeline:
+      gha: *armbian-gha
+      build-image: "yes"
+    vars:
+      RELEASE: oracular
+      BUILD_MINIMAL: "no"
+      BUILD_DESKTOP: "no"
+    items:
+      - { BOARD: aml-s9xx-box, BRANCH: edge }
+
+  # ubuntu stable xfce
+  xfce-desktop-stable-ubuntu:
+    enabled: yes
+    configs: [ armbian-community ]
+    pipeline:
+      gha: *armbian-gha
+      build-image: "yes"
+    vars:
+      RELEASE: noble
+      BUILD_MINIMAL: "no"
+      DESKTOP_ENVIRONMENT: "xfce"
+      BUILD_DESKTOP: "yes"
+      DESKTOP_ENVIRONMENT_CONFIG_NAME: "config_base"
+      DESKTOP_APPGROUPS_SELECTED: "desktop_tools,internet,languages,multimedia,remote_desktop"
+    items:
+      - *community-maintained-riscv64
+      - *community-maintained-slow-hdmi
+      - { BOARD: aml-s9xx-box, BRANCH: current }
+
+  # ubuntu stable gnome
+  gnome-desktop-stable-ubuntu:
+    enabled: yes
+    configs: [ armbian-community ]
+    pipeline:
+      gha: *armbian-gha
+      build-image: "yes"
+    vars:
+      RELEASE: noble
+      BUILD_MINIMAL: "no"
+      DESKTOP_ENVIRONMENT: "gnome"
+      BUILD_DESKTOP: "yes"
+      DESKTOP_ENVIRONMENT_CONFIG_NAME: "config_base"
+      DESKTOP_APPGROUPS_SELECTED: "browsers,chat,desktop_tools,editors,email,internet,languages,multimedia,office,programming,remote_desktop"
+    items:
+      - *community-maintained-fast-hdmi
+
+  # ubuntu unstable xfce
+  xfce-desktop-unstable-ubuntu:
+    enabled: yes
+    configs: [ armbian-community ]
+    pipeline:
+      gha: *armbian-gha
+      build-image: "yes"
+    vars:
+      RELEASE: oracular
+      BUILD_MINIMAL: "no"
+      DESKTOP_ENVIRONMENT: "xfce"
+      BUILD_DESKTOP: "yes"
+      DESKTOP_ENVIRONMENT_CONFIG_NAME: "config_base"
+      DESKTOP_APPGROUPS_SELECTED: "desktop_tools,internet,languages,multimedia,remote_desktop"
+    items:
+      - { BOARD: aml-s9xx-box, BRANCH: edge }
+
+  # ubuntu unstable gnome
+  gnome-desktop-unstable-ubuntu:
+    enabled: yes
+    configs: [ armbian-community ]
+    pipeline:
+      gha: *armbian-gha
+      build-image: "yes"
+    vars:
+      RELEASE: oracular
+      BUILD_MINIMAL: "no"
+      DESKTOP_ENVIRONMENT: "gnome"
+      BUILD_DESKTOP: "yes"
+      DESKTOP_ENVIRONMENT_CONFIG_NAME: "config_base"
+      DESKTOP_APPGROUPS_SELECTED: "browsers,chat,desktop_tools,editors,email,internet,languages,multimedia,office,programming,remote_desktop"
+    items:
+      - { BOARD: aml-s9xx-box, BRANCH: edge }
+
+  # ubuntu stable Cinnamon
+  cinnamon-desktop-stable-ubuntu:
+    enabled: yes
+    configs: [ armbian-community ]
+    pipeline:
+      gha: *armbian-gha
+      build-image: "yes"
+    vars:
+      RELEASE: noble
+      BUILD_MINIMAL: "no"
+      DESKTOP_ENVIRONMENT: "cinnamon"
+      BUILD_DESKTOP: "yes"
+      DESKTOP_ENVIRONMENT_CONFIG_NAME: "config_base"
+      DESKTOP_APPGROUPS_SELECTED: "browsers,chat,desktop_tools,editors,email,internet,languages,multimedia,office,programming,remote_desktop"
+    items:
+      - { BOARD: aml-s9xx-box, BRANCH: current }
+
+  # automated section
+  automated-section:
+    enabled: no
+    configs: [ armbian-community ]
+    pipeline:
+      gha: *armbian-gha
+      build-image: "no"
+    vars:
+      RELEASE: jammy
+      BUILD_MINIMAL: "yes"
+      BUILD_DESKTOP: "no"
+    items:
+      - *community-maintained-riscv64
+      - *community-maintained-headless
+      - *community-maintained-fast-hdmi
+      - *community-maintained-slow-hdmi
+  # end of automated-section:
