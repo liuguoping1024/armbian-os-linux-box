@@ -39,12 +39,16 @@ initialize_git_repo() {
   fi
 }
 
+
+
 # Directories setup
 current_dir=$(pwd)
 print_info "Working directory is '$current_dir'"
 
 # Check Git installation
 print_info "$(/usr/bin/git version)"
+git config --global http.version HTTP/1.1
+git config --global http.postBuffer 524288000
 
 # User patches setup
 #cd "$work_dir/armbian-os"
@@ -143,4 +147,6 @@ seconds=$((elapsed_time % 60))
 
 print_info "Armbian build finished."
 print_info "Build completed in ${minutes} minutes, and ${seconds} seconds."
+
+
 
