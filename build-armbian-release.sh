@@ -73,7 +73,7 @@ print_info "Start building ..."
 ./compile.sh 'BETA=no' 'BOARD=jethubj100' 'BRANCH=current' 'BUILD_DESKTOP=no' 'BUILD_MINIMAL=no' 'RELEASE=bookworm' \
   'REVISION=24.11' jethome-images REVISION="24.11" USE_FIXED_LOOP_DEVICE="$USE_FIXED_LOOP_DEVICE" \
   MAKE_FOLDERS="archive" IMAGE_VERSION=24.11 SHOW_DEBIAN=yes SHARE_LOG=no ALLOW_ROOT=yes KERNEL_GIT=shallow \
-  UPLOAD_TO_OCI_ONLY=no NETWORKING_STACK="network-manager" ARTIFACT_IGNORE_CACHE=yes
+  UPLOAD_TO_OCI_ONLY=no NETWORKING_STACK="network-manager" ARTIFACT_IGNORE_CACHE=yes EXTRAWIFI=no
 
 #ARTIFACT_IGNORE_CACHE=yes
 
@@ -125,15 +125,15 @@ esac
 rm -rf output/usr
 
 IMGBURN=$(find output | grep -e  "Armbian.*burn.img.zip$" | head -n 1)
-print_info "IMGBURN: ${IMGBURN}"
+print_info "IMGBURN: [ ${IMGBURN} ]"
 
 [ -z "${IMGBURN}" ] && exit 50
 
 CHANNEL="release"
 
 print_info "board=${BOARD} brd=${BOARD:6} branch=${BRANCH} channel=${CHANNEL} release=${RELEASE} supported=${SUPPORTED}"
-print_info "image=${IMG}"
-print_info "imageburn=tools/${IMGBURN}"
+print_info "image=[ ${IMG} ]"
+print_info "imageburn=[ tools.repo/${IMGBURN} ]"
 
 # Record end time
 end_time=$(date +%s)
