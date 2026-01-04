@@ -63,6 +63,8 @@ if test "$board" = "jethub-j100"; then
     fi;
 fi;
 
+echo "Applying DT kernel file for JetHub D1/P W155S1 device: ${fdtfile}"
+
 
 load ${devtype} ${devnum} ${ramdisk_addr_r} ${prefix}uInitrd
 load ${devtype} ${devnum} ${kernel_addr_r} ${prefix}Image

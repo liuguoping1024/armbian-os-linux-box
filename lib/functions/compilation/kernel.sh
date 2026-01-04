@@ -10,6 +10,7 @@
 function compile_kernel() {
 	declare kernel_work_dir="${SRC}/cache/sources/${LINUXSOURCEDIR}"
 	display_alert "Kernel build starting" "${LINUXSOURCEDIR}" "info"
+	display_alert "Kernel work dir: ${kernel_work_dir}" "info"
 
 	# Prepare the git bare repo for the kernel; shared between all kernel builds
 	declare kernel_git_bare_tree
@@ -30,28 +31,40 @@ function compile_kernel() {
 	LOG_SECTION="kernel_prepare_bare_repo_from_oras_gitball" do_with_logging do_with_hooks \
 		kernel_prepare_bare_repo_from_oras_gitball # this sets kernel_git_bare_tree
 
-	# prepare the working copy; this is the actual kernel source tree for this build
-	declare checked_out_revision_ts="" checked_out_revision="undetermined" # set by fetch_from_repo
-	LOG_SECTION="kernel_prepare_git" do_with_logging_unless_user_terminal do_with_hooks kernel_prepare_git
+	# Skip worktree creation and patching if PATCH_SKIP=yes (for faster recompilation)
+	if [[ "${PATCH_SKIP:-no}" != "yes" ]]; then
+		# prepare the working copy; this is the actual kernel source tree for this build
+		declare checked_out_revision_ts="" checked_out_revision="undetermined" # set by fetch_from_repo
+		LOG_SECTION="kernel_prepare_git" do_with_logging_unless_user_terminal do_with_hooks kernel_prepare_git
 
-	# Capture date variables set by fetch_from_repo; it's the date of the last kernel revision
-	declare kernel_git_revision="${checked_out_revision}"
-	declare kernel_base_revision_ts="${checked_out_revision_ts}"
-	declare kernel_base_revision_date # Used for KBUILD_BUILD_TIMESTAMP in make.
-	kernel_base_revision_date="$(LC_ALL=C date -d "@${kernel_base_revision_ts}")"
-	display_alert "Using Kernel git revision" "${kernel_git_revision} at '${kernel_base_revision_date}'"
+		# Capture date variables set by fetch_from_repo; it's the date of the last kernel revision
+		declare kernel_git_revision="${checked_out_revision}"
+		declare kernel_base_revision_ts="${checked_out_revision_ts}"
+		declare kernel_base_revision_date # Used for KBUILD_BUILD_TIMESTAMP in make.
+		kernel_base_revision_date="$(LC_ALL=C date -d "@${kernel_base_revision_ts}")"
+		display_alert "Using Kernel git revision" "${kernel_git_revision} at '${kernel_base_revision_date}'"
 
-	# Call extension method to prepare extra sources
-	call_extension_method "kernel_copy_extra_sources" <<- 'ARMBIAN_KERNEL_SOURCES_EXTRA'
-		*Hook to copy extra kernel sources to the kernel under compilation*
-	ARMBIAN_KERNEL_SOURCES_EXTRA
+		# Call extension method to prepare extra sources
+		call_extension_method "kernel_copy_extra_sources" <<- 'ARMBIAN_KERNEL_SOURCES_EXTRA'
+			*Hook to copy extra kernel sources to the kernel under compilation*
+		ARMBIAN_KERNEL_SOURCES_EXTRA
 
-	# Possibly 'make clean'.
-	LOG_SECTION="kernel_maybe_clean" do_with_logging do_with_hooks kernel_maybe_clean
+		# Possibly 'make clean'.
+		LOG_SECTION="kernel_maybe_clean" do_with_logging do_with_hooks kernel_maybe_clean
 
-	# Patching.
-	declare hash pre_patch_version
-	kernel_main_patching # has it's own logging sections inside
+		# Patching.
+		declare hash pre_patch_version
+		kernel_main_patching # has it's own logging sections inside
+
+	else
+		display_alert "Skipping kernel patching" "PATCH_SKIP=yes" "info"
+
+		# Possibly 'make clean'.
+		LOG_SECTION="kernel_maybe_clean" do_with_logging do_with_hooks kernel_maybe_clean
+
+		display_alert "Making clean" "${kernel_work_dir}" "info"
+		cd ${kernel_work_dir} && make clean
+	fi
 
 	# Stop after patching.
 	if [[ "${PATCH_ONLY}" == yes ]]; then
