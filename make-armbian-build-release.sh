@@ -85,32 +85,31 @@ if [ -d "$current_dir/.tmp" ]; then
 fi
 
 if [ -d "$current_dir/output" ]; then
+  rm -rf $current_dir/output/info
+  rm -rf $current_dir/output/logs
+  rm -rf $current_dir/output/packages-hashed
   rm -rf $current_dir/output/images
+  rm -rf $current_dir/output/debs/linux-image-*
 fi
 
 mkdir -p $current_dir/output/images
 
-export KERNEL_REUSE_LOCAL=yes
-
-if [ -f "$current_dir/.armbian-patch-marker" ]; then
-  export PATCH_SKIP=yes
-
-  ./compile.sh 'BETA=no' 'BOARD=jethubj100' 'BRANCH=current' 'BUILD_DESKTOP=no' 'BUILD_MINIMAL=no' 'RELEASE=bookworm' \
-    'REVISION=24.11' jethome-images REVISION="24.11" USE_FIXED_LOOP_DEVICE="$USE_FIXED_LOOP_DEVICE" \
-    MAKE_FOLDERS="archive" IMAGE_VERSION=24.11 SHOW_DEBIAN=yes SHARE_LOG=no ALLOW_ROOT=yes KERNEL_GIT=shallow \
-    UPLOAD_TO_OCI_ONLY=no NETWORKING_STACK="network-manager" EXTRAWIFI=no DOWNLOAD_MIRROR=china \
-    COMPRESS_OUTPUTIMAGE="sha,img" PATCH_SKIP="$PATCH_SKIP"
-else
-
-  ./compile.sh 'BETA=no' 'BOARD=jethubj100' 'BRANCH=current' 'BUILD_DESKTOP=no' 'BUILD_MINIMAL=no' 'RELEASE=bookworm' \
-    'REVISION=24.11' jethome-images REVISION="24.11" USE_FIXED_LOOP_DEVICE="$USE_FIXED_LOOP_DEVICE" \
-    MAKE_FOLDERS="archive" IMAGE_VERSION=24.11 SHOW_DEBIAN=yes SHARE_LOG=no ALLOW_ROOT=yes KERNEL_GIT=shallow \
-    UPLOAD_TO_OCI_ONLY=no NETWORKING_STACK="network-manager" EXTRAWIFI=no DOWNLOAD_MIRROR=china \
-    COMPRESS_OUTPUTIMAGE="sha,img" PATCH_SKIP=no
-
-  touch "$current_dir/.armbian-patch-marker"
+# Clean up linux-kernel-worktree before compilation
+if [ -d "$current_dir/cache/sources/linux-kernel-worktree/6.6__meson64__arm64" ]; then
+  print_info "Cleaning up linux-kernel-worktree with make clean..."
+  cd "$current_dir/cache/sources/linux-kernel-worktree/6.6__meson64__arm64"
+  make clean
+  cd "$current_dir"
+  print_info "Cleanup completed."
 fi
 
+export KERNEL_REUSE_LOCAL=yes
+
+./compile.sh 'BETA=no' 'BOARD=jethubj100' 'BRANCH=current' 'BUILD_DESKTOP=no' 'BUILD_MINIMAL=no' 'RELEASE=bookworm' \
+    'REVISION=24.11' jethome-images REVISION="24.11" USE_FIXED_LOOP_DEVICE="$USE_FIXED_LOOP_DEVICE" \
+    MAKE_FOLDERS="archive" IMAGE_VERSION=24.11 SHOW_DEBIAN=yes SHARE_LOG=no ALLOW_ROOT=yes KERNEL_GIT=shallow \
+    UPLOAD_TO_OCI_ONLY=no NETWORKING_STACK="network-manager" EXTRAWIFI=no  \
+    COMPRESS_OUTPUTIMAGE="sha,img" PATCH_SKIP=no
 
 #ARTIFACT_IGNORE_CACHE=yes
 

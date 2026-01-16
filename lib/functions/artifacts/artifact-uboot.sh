@@ -206,9 +206,7 @@ function artifact_uboot_is_available_in_local_cache() {
 }
 
 function artifact_uboot_is_available_in_remote_cache() {
-	#is_artifact_available_in_remote_cache
-	artifact_exists_in_remote_cache="no"
-	return 0
+	is_artifact_available_in_remote_cache
 }
 
 function artifact_uboot_obtain_from_remote_cache() {
