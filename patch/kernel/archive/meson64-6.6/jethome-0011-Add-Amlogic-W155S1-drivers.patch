@@ -1,7 +1,7 @@
-From 09422d2e6d97b1bf41fdac0860fcd9c9d9f0f131 Mon Sep 17 00:00:00 2001
+From 78eda1dc7c9a0c1412fb435572cdf94da5774cac Mon Sep 17 00:00:00 2001
 From: "guoping.liu" <guoping.liu@3reality.com>
-Date: Thu, 15 Jan 2026 11:42:33 +0800
-Subject: [PATCH] Add Amlogic W155S1 drivers
+Date: Thu, 15 Jan 2026 18:35:41 +0800
+Subject: [PATCH 11/11] Add Amlogic W155S1 drivers
 
 ---
  drivers/bluetooth/Kconfig                     |    1 +

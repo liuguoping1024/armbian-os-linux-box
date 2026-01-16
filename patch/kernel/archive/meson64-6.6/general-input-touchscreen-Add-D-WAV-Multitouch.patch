@@ -1,24 +1,24 @@
-From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
-From: Hyeonki Hong <hhk7734@gmail.com>
-Date: Thu, 5 Mar 2020 19:01:43 +0900
-Subject: ODROID-COMMON: input/touchscreen: Add D-WAV Multitouch driver.
+From 57993fa7fcac96b0d22a22582aa3d2c094a30161 Mon Sep 17 00:00:00 2001
+From: "guoping.liu" <guoping.liu@3reality.com>
+Date: Thu, 15 Jan 2026 17:46:22 +0800
+Subject: [PATCH 03/24] general input touchscreen Add D WAV Multitouch
 
-Change-Id: Ia1c8c29d3f69c6ba5d630279c4cc98119b68ab71
 ---
  drivers/hid/hid-ids.h                   |   6 +
- drivers/hid/hid-quirks.c                |   3 +
+ drivers/hid/hid-quirks.c                |   2 +
  drivers/input/touchscreen/Kconfig       |  10 +
  drivers/input/touchscreen/Makefile      |   1 +
- drivers/input/touchscreen/dwav-usb-mt.c | 554 ++++++++++
- 5 files changed, 574 insertions(+)
+ drivers/input/touchscreen/dwav-usb-mt.c | 554 ++++++++++++++++++++++++
+ 5 files changed, 573 insertions(+)
+ create mode 100644 drivers/input/touchscreen/dwav-usb-mt.c
 
 diff --git a/drivers/hid/hid-ids.h b/drivers/hid/hid-ids.h
-index e4d2dfd5d253..28543327a2df 100644
+index ca9c70c8f3cf..d4af1d0f18b4 100644
 --- a/drivers/hid/hid-ids.h
 +++ b/drivers/hid/hid-ids.h
-@@ -1457,4 +1457,10 @@
- #define USB_VENDOR_ID_SIGNOTEC			0x2133
- #define USB_DEVICE_ID_SIGNOTEC_VIEWSONIC_PD1011	0x0018
+@@ -1515,4 +1515,10 @@
+ #define USB_VENDOR_ID_JIELI_SDK_DEFAULT		0x4c4a
+ #define USB_DEVICE_ID_JIELI_SDK_4155		0x4155
  
 +#define USB_DEVICE_ID_DWAV_MULTITOUCH	0x0005
 +
@@ -28,19 +28,18 @@ index e4d2dfd5d253..28543327a2df 100644
 +
  #endif
 diff --git a/drivers/hid/hid-quirks.c b/drivers/hid/hid-quirks.c
-index 3983b4f282f8..38217748b1ec 100644
+index 2da21415e676..3133771fd4c1 100644
 --- a/drivers/hid/hid-quirks.c
 +++ b/drivers/hid/hid-quirks.c
-@@ -888,6 +888,9 @@ static const struct hid_device_id hid_ignore_list[] = {
+@@ -900,6 +900,8 @@ static const struct hid_device_id hid_ignore_list[] = {
  	{ HID_USB_DEVICE(USB_VENDOR_ID_SYNAPTICS, USB_DEVICE_ID_SYNAPTICS_DPAD) },
  #endif
  	{ HID_USB_DEVICE(USB_VENDOR_ID_YEALINK, USB_DEVICE_ID_YEALINK_P1K_P4K_B2K) },
-+
 +	{ HID_USB_DEVICE(USB_VENDOR_ID_ODROID, USB_DEVICE_ID_VU5) },
-+	{ HID_USB_DEVICE(USB_VENDOR_ID_ODROID, USB_DEVICE_ID_VU7PLUS) },
++	{ HID_USB_DEVICE(USB_VENDOR_ID_ODROID, USB_DEVICE_ID_VU7PLUS) },	
+ 	{ HID_USB_DEVICE(USB_VENDOR_ID_QUANTA, USB_DEVICE_ID_QUANTA_HP_5MP_CAMERA_5473) },
  	{ }
  };
- 
 diff --git a/drivers/input/touchscreen/Kconfig b/drivers/input/touchscreen/Kconfig
 index e3e2324547b9..2e829e2552d3 100644
 --- a/drivers/input/touchscreen/Kconfig
@@ -632,5 +631,5 @@ index 000000000000..7ec8b6dd15fd
 +MODULE_ALIAS("dwav_usb_mt");
 \ No newline at end of file
 -- 
-Armbian
+2.39.5
 

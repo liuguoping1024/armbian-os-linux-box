@@ -1,7 +1,7 @@
-From 064b2d653dd9346648cc823dfc2eed8886238938 Mon Sep 17 00:00:00 2001
+From 4ca46cb435009df853e18ddb3b9e449cfdb6c88f Mon Sep 17 00:00:00 2001
 From: "guoping.liu" <guoping.liu@3reality.com>
-Date: Thu, 15 Jan 2026 10:53:09 +0800
-Subject: [PATCH] Add Amlogic minimal drivers
+Date: Thu, 15 Jan 2026 18:17:19 +0800
+Subject: [PATCH 10/11] Add Amlogic minimal drivers
 
 ---
  arch/arm64/boot/dts/amlogic/Makefile          |  150 +-
@@ -25,7 +25,7 @@ Subject: [PATCH] Add Amlogic minimal drivers
  drivers/amlogic/wifi/dhd_static_buf.c         |  611 ++++
  drivers/amlogic/wifi/wifi_dt.c                | 1078 +++++++
  drivers/gpio/gpiolib-of.c                     |   29 +-
- drivers/mmc/core/quirks.h                     |   17 +-
+ drivers/mmc/core/quirks.h                     |   15 -
  drivers/mmc/core/sdio.c                       |   46 +
  drivers/mmc/core/slot-gpio.c                  |   46 +-
  drivers/mmc/host/meson-gx-mmc.c               | 2758 +++++++++--------
@@ -53,7 +53,7 @@ Subject: [PATCH] Add Amlogic minimal drivers
  include/linux/of_gpio.h                       |   26 +
  include/linux/pwm.h                           |    4 +-
  kernel/sched/core.c                           |    1 +
- 49 files changed, 8050 insertions(+), 2253 deletions(-)
+ 49 files changed, 8049 insertions(+), 2252 deletions(-)
  create mode 100644 arch/arm64/configs/amlogic_defconfig
  create mode 100644 arch/arm64/configs/amlogic_fragment.config
  create mode 100644 drivers/amlogic/Kconfig
@@ -4699,7 +4699,7 @@ index 000000000000..f07eca9e026f
 + 
 \ No newline at end of file
 diff --git a/drivers/gpio/gpiolib-of.c b/drivers/gpio/gpiolib-of.c
-index cec9e8f29bbd..75f6e735f6ba 100644
+index c1e83b2926ae..2cf70fd32d1f 100644
 --- a/drivers/gpio/gpiolib-of.c
 +++ b/drivers/gpio/gpiolib-of.c
 @@ -25,21 +25,6 @@
@@ -4724,7 +4724,7 @@ index cec9e8f29bbd..75f6e735f6ba 100644
  /**
   * of_gpio_named_count() - Count GPIOs for a device
   * @np:		device node to count GPIOs for
-@@ -416,6 +401,20 @@ static struct gpio_desc *of_get_named_gpiod_flags(const struct device_node *np,
+@@ -425,6 +410,20 @@ static struct gpio_desc *of_get_named_gpiod_flags(const struct device_node *np,
  	return desc;
  }
  
@@ -4746,14 +4746,13 @@ index cec9e8f29bbd..75f6e735f6ba 100644
   * of_get_named_gpio() - Get a GPIO number to use with GPIO API
   * @np:		device node to get GPIO from
 diff --git a/drivers/mmc/core/quirks.h b/drivers/mmc/core/quirks.h
-index 92905fc46436..4fa3b3f51717 100644
+index c417ed34c057..9551c04f0856 100644
 --- a/drivers/mmc/core/quirks.h
 +++ b/drivers/mmc/core/quirks.h
-@@ -112,22 +112,7 @@ static const struct mmc_fixup __maybe_unused mmc_blk_fixups[] = {
- 		  MMC_QUIRK_TRIM_BROKEN),
+@@ -138,21 +138,6 @@ static const struct mmc_fixup __maybe_unused mmc_blk_fixups[] = {
  	MMC_FIXUP("V10016", CID_MANFID_KINGSTON, CID_OEMID_ANY, add_quirk_mmc,
  		  MMC_QUIRK_TRIM_BROKEN),
--
+ 
 -	/*
 -	 * Micron MTFC4GACAJCN-1M supports TRIM but does not appear to support
 -	 * WRITE_ZEROES offloading. It also supports caching, but the cache can
@@ -4769,15 +4768,14 @@ index 92905fc46436..4fa3b3f51717 100644
 -	MMC_FIXUP("M62704", CID_MANFID_KINGSTON, 0x0100, add_quirk_mmc,
 -		  MMC_QUIRK_TRIM_BROKEN),
 -
-+		  
- 	/*
- 	 * Some SD cards reports discard support while they don't
- 	 */
+ 	END_FIXUP
+ };
+ 
 diff --git a/drivers/mmc/core/sdio.c b/drivers/mmc/core/sdio.c
-index 5914516df2f7..094266dd0a19 100644
+index 2c58df6855f2..c09211755fc4 100644
 --- a/drivers/mmc/core/sdio.c
 +++ b/drivers/mmc/core/sdio.c
-@@ -1328,3 +1328,49 @@ int mmc_attach_sdio(struct mmc_host *host)
+@@ -1334,3 +1334,49 @@ int mmc_attach_sdio(struct mmc_host *host)
  	return err;
  }
  
@@ -11113,10 +11111,10 @@ index 63426d8255e4..f715d3c11b46 100644
  				       struct fwnode_handle *fwnode,
  				       const char *con_id);
 diff --git a/kernel/sched/core.c b/kernel/sched/core.c
-index b6f922a20f83..377ef81f90c0 100644
+index c4a9797e9eff..1a3bc6e3fe8a 100644
 --- a/kernel/sched/core.c
 +++ b/kernel/sched/core.c
-@@ -7885,6 +7885,7 @@ int sched_setscheduler(struct task_struct *p, int policy,
+@@ -7880,6 +7880,7 @@ int sched_setscheduler(struct task_struct *p, int policy,
  {
  	return _sched_setscheduler(p, policy, param, true);
  }
